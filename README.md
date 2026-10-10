@@ -14,4 +14,7 @@ Proyecto universitario · Equipo 6 · Universidad de Guadalajara · Innovación 
 Es un sitio estático de un solo archivo (`index.html`). Solo abre `index.html` en el navegador
 o publícalo con GitHub Pages (Settings → Pages → Branch: main, carpeta / (root)).
 
+## Despliegue
+Puedes visitar el link https://johanssantiago5950-debug.github.io/jalecitos/ para visualizar la pagina con github
+
 Los datos se guardan en el navegador (localStorage).
