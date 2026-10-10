@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Jalecitos - Encuentra ayuda rápido en Guadalajara</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:'#f97316',dark:'#1e293b'}}}}</script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth}
+body{background:#f9fafb}
+.hero{background:#fff radial-gradient(circle at 85% 0,#ffedd5 0,transparent 45%)}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.up{animation:up .35s ease-out both}
+.inp{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.6rem .75rem;background:#fff;outline:none}
+.inp:focus{border-color:#f97316;box-shadow:0 0 0 3px #fed7aa}
+.chip{padding:.35rem .8rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.chip.on{background:#f97316;color:#fff;border-color:#f97316}
+</style>
+</head>
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen">
+
+<nav class="bg-white/95 backdrop-blur shadow-sm border-b border-gray-200 sticky z-40" style="top:env(safe-area-inset-top,0px)">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="#top" class="font-extrabold text-2xl text-dark tracking-tight">💼 Jalecitos</a>
+    <div class="flex items-center gap-2 sm:gap-4 text-sm font-semibold">
+      <a href="#buscar" class="hidden sm:block text-gray-600 hover:text-brand">Buscar</a>
+      <a href="#publicar" class="hidden sm:block text-gray-600 hover:text-brand">Publicar jale</a>
+      <button onclick="showFavs()" class="text-gray-600 hover:text-brand">♥ <span id="favCount">0</span></button>
+      <button onclick="openRegister()" class="bg-brand text-white px-4 py-2 rounded-md hover:bg-orange-600 shadow">Ofrecer servicios</button>
+    </div>
+  </div>
+</nav>
+
+<main class="flex-grow" id="top">
+  <section class="hero border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 text-center">
+      <span class="inline-block py-1 px-3 rounded-full bg-orange-100 text-brand font-semibold text-sm mb-4">Proyecto Universitario · Innovación Tecnológica</span>
+      <h1 class="text-4xl md:text-6xl font-extrabold text-dark mb-5 tracking-tight">El talento que necesitas para tu <span class="text-brand underline decoration-4 underline-offset-4">"jale"</span> en GDL</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">Conecta con expertos locales de la ZMG: filtra por oficio y zona, revisa calificaciones y escríbeles directo por WhatsApp.</p>
+      <div class="bg-white p-2 rounded-2xl shadow-xl border border-gray-200 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+        <input id="q" class="inp border-0" placeholder="Ej. plomero, reparar PC, pintar casa…" oninput="render()">
+        <select id="zona" class="inp sm:w-48" onchange="render()"></select>
+        <button onclick="document.getElementById('buscar').scrollIntoView()" class="bg-dark text-white px-6 py-2.5 rounded-xl font-bold hover:bg-gray-800">🔍 Buscar</button>
+      </div>
+      <div id="chips" class="flex gap-2 mt-5 overflow-x-auto pb-1 sm:flex-wrap sm:justify-center"></div>
+    </div>
+  </section>
+
+  <section id="buscar" class="max-w-6xl mx-auto px-4 py-12 w-full">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <h2 class="text-2xl font-extrabold text-dark" id="resTitle">Expertos disponibles</h2>
+      <select id="sort" class="inp w-auto" onchange="render()">
+        <option value="rating">Mejor calificados</option>
+        <option value="price">Menor tarifa</option>
+        <option value="jobs">Más jales completados</option>
+      </select>
+    </div>
+    <div id="grid" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </section>
+
+  <section id="publicar" class="bg-dark text-white py-16">
+    <div class="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="text-3xl font-extrabold mb-4">Publica tu jale y deja que el match trabaje</h2>
+        <p class="text-gray-300 mb-4">Cuéntanos qué necesitas y calculamos los expertos más compatibles según oficio, zona, calificación y verificación.</p>
+        <ul class="text-gray-300 space-y-2 text-sm"><li>✔️ Prioriza perfiles "Jale Seguro"</li><li>✔️ Más peso a los de tu zona</li><li>✔️ Contacto directo por WhatsApp</li></ul>
+      </div>
+      <form onsubmit="return matchNeed(event)" class="bg-white text-gray-800 rounded-2xl p-6 grid gap-3">
+        <label class="text-sm font-semibold">¿Qué necesitas?<textarea id="nDesc" required rows="2" class="inp mt-1" placeholder="Ej. Fuga de agua en el baño"></textarea></label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="text-sm font-semibold">Oficio<select id="nCat" class="inp mt-1"></select></label>
+          <label class="text-sm font-semibold">Zona<select id="nZona" class="inp mt-1"></select></label>
+        </div>
+        <button class="bg-brand text-white font-bold py-3 rounded-lg hover:bg-orange-600">⚡ Buscar mi match</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-gray-100 py-10 border-t border-gray-200">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row gap-6 justify-between items-center md:items-start">
+    <div class="text-center md:text-left">
+      <p class="font-extrabold text-2xl text-gray-800">💼 Jalecitos</p>
+      <p class="text-sm text-gray-500 mt-2 max-w-xs">Conectando habilidades con necesidades en la Zona Metropolitana de Guadalajara.</p>
+      <button onclick="resetDemo()" class="text-xs text-gray-400 underline mt-3">Restablecer datos de demostración</button>
+    </div>
+    <div class="text-sm text-gray-600 text-center md:text-right bg-white p-5 rounded-xl border border-gray-200">
+      <p class="font-bold text-brand uppercase tracking-wider mb-1">Proyecto Universitario · Equipo 6</p>
+      <p>Yerik Hanniel Magaña · Diana Janeth Miramontes<br>Gandhi Dante Vázquez · Jose Guillermo Olvera<br>Johans Alejandro Santiago Herrera</p>
+      <p class="text-xs text-gray-400 mt-3 pt-2 border-t border-gray-100">Universidad de Guadalajara · Innovación Tecnológica 2026</p>
+    </div>
+  </div>
+</footer>
+
+<div id="modal" class="fixed inset-0 z-50 hidden bg-black/50 p-4 overflow-y-auto" onclick="if(event.target===this)closeModal()">
+  <div id="mBody" class="bg-white rounded-2xl max-w-md mx-auto my-8 p-6 up"></div>
+</div>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 bg-dark text-white px-5 py-3 rounded-full shadow-xl text-sm hidden"></div>
+
+<script>
+const CATS=['Plomería','Electricidad','Computación','Albañilería','Limpieza','Jardinería','Pintura','Mudanzas'];
+const ZONAS=['Guadalajara Centro','Zapopan','Tlaquepaque','Tonalá','Tlajomulco'];
+const SEED=[
+ [1,'Carlos Ramírez','Plomería','Zapopan',350,'Fugas, instalación de boilers y destapado de drenajes.',4.8,24,1,31],
+ [2,'Juan Pérez','Computación','Guadalajara Centro',300,'Reparación de laptops y PC, formateo, redes y recuperación de datos.',5,45,1,45],
+ [3,'María López','Limpieza','Tlaquepaque',250,'Limpieza profunda de casas y oficinas, post-obra incluida.',4.7,18,1,22],
+ [4,'Ernesto Vega','Electricidad','Guadalajara Centro',400,'Instalaciones, centros de carga, contactos y cableado seguro.',4.9,33,1,40],
+ [5,'Don Beto Ruiz','Albañilería','Tonalá',500,'Muros, colados, enjarres y remodelaciones pequeñas. Llevo chalán.',4.5,12,0,15],
+ [6,'Lupita Hernández','Jardinería','Tlajomulco',280,'Poda, diseño de jardines, riego automático y mantenimiento mensual.',4.6,9,1,11],
+ [7,'Armando Sánchez','Pintura','Zapopan',320,'Pintura interior y exterior, impermeabilizante y retoques.',4.4,15,0,19],
+ [8,'Fletes El Güero','Mudanzas','Tlaquepaque',600,'Mudanzas locales con camioneta y ayudantes, cuidamos tus muebles.',4.7,27,1,35],
+ [9,'Diego Navarro','Computación','Zapopan',280,'Soporte técnico a domicilio, cámaras de seguridad y WiFi.',4.6,14,1,17],
+ [10,'Rosa Medina','Limpieza','Zapopan',230,'Aseo semanal y quincenal, planchado y organización del hogar.',4.8,21,0,26]
+].map(a=>({id:a[0],name:a[1],cat:a[2],zona:a[3],rate:a[4],desc:a[5],rating:a[6],reviews:a[7],verified:!!a[8],jobs:a[9],wa:'3300000000'+a[0]%10}));
+
+const KEY='jalecitos_v2';
+let S={workers:SEED,favs:[],rated:{}};
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const stars=r=>{const n=Math.round(r);return '★'.repeat(n)+'☆'.repeat(5-n)};
+const color=n=>['#10b981','#f97316','#3b82f6','#8b5cf6','#ec4899','#14b8a6'][[...n].reduce((a,c)=>a+c.charCodeAt(0),0)%6];
+const ini=n=>n.split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const SYN={Plomería:'plomero agua fuga boiler drenaje',Electricidad:'electricista luz cable corto',Computación:'pc laptop computadora tecnico internet wifi',Albañilería:'albanil obra chalan construccion muro',Limpieza:'aseo limpiar casa',Jardinería:'jardinero pasto poda plantas',Pintura:'pintor pintar pared',Mudanzas:'flete mudanza camioneta'};
+let cat='Todos';
+
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hidden'),2600)}
+function fill(){
+  const opt=(a,first)=>(first?`<option value="">${first}</option>`:'')+a.map(x=>`<option>${x}</option>`).join('');
+  $('zona').innerHTML=opt(ZONAS,'Toda la ZMG');$('nCat').innerHTML=opt(CATS);$('nZona').innerHTML=opt(ZONAS);
+  $('chips').innerHTML=['Todos',...CATS].map(c=>`<button class="chip ${c===cat?'on':''}" onclick="cat='${c}';fill2();render()">${c}</button>`).join('');
+}
+function fill2(){document.querySelectorAll('#chips .chip').forEach(b=>b.classList.toggle('on',b.textContent===cat))}
+function matchText(w,q){if(!q)return true;const h=norm([w.name,w.cat,w.zona,w.desc,SYN[w.cat]||''].join(' '));return norm(q).split(/\s+/).every(t=>h.includes(t))}
+function cardHTML(w,extra=''){
+  const fav=S.favs.includes(w.id);
+  return `<div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-lg transition up flex flex-col">
+  <div class="flex items-start gap-3">
+    <div class="w-12 h-12 rounded-full text-white font-bold flex items-center justify-center shrink-0" style="background:${color(w.name)}">${esc(ini(w.name))}</div>
+    <div class="flex-grow min-w-0"><h3 class="font-bold text-dark truncate">${esc(w.name)}</h3>
+      <p class="text-sm text-brand font-semibold">${esc(w.cat)} · ${esc(w.zona)}</p></div>
+    <button onclick="toggleFav(${w.id})" class="text-xl ${fav?'text-red-500':'text-gray-300'}" title="Favorito">♥</button>
+  </div>
+  <div class="mt-3 flex flex-wrap gap-2 text-xs">
+    ${w.verified?'<span class="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded-full">🛡️ Jale Seguro</span>':''}
+    ${w.reviews?`<span class="text-yellow-500 font-bold">${stars(w.rating)}</span><span class="text-gray-500">${w.rating.toFixed(1)} (${w.reviews})</span>`:'<span class="bg-green-50 text-green-600 font-bold px-2 py-1 rounded-full">Nuevo</span>'}
+  </div>
+  <p class="text-sm text-gray-600 mt-3 flex-grow">${esc(w.desc)}</p>
+  ${extra}
+  <div class="mt-4 flex items-center justify-between"><span class="font-bold text-dark">$${w.rate}<span class="text-xs text-gray-400 font-normal">/hora</span></span>
+  <button onclick="openWorker(${w.id})" class="bg-brand text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-orange-600">Ver y contactar</button></div></div>`;
+}
+function render(){
+  const q=$('q').value.trim(),z=$('zona').value,s=$('sort').value;
+  let l=S.workers.filter(w=>(cat==='Todos'||w.cat===cat)&&(!z||w.zona===z)&&matchText(w,q));
+  l.sort((a,b)=>s==='price'?a.rate-b.rate:s==='jobs'?b.jobs-a.jobs:b.rating-a.rating);
+  $('resTitle').textContent=`${l.length} experto${l.length===1?'':'s'} disponible${l.length===1?'':'s'}`;
+  $('grid').innerHTML=l.length?l.map(w=>cardHTML(w)).join(''):'<p class="text-gray-500 col-span-full text-center py-10">Sin resultados. Prueba otro oficio o zona, o <button class="text-brand underline" onclick="openRegister()">ofrece tu servicio</button>.</p>';
+  $('favCount').textContent=S.favs.length;
+}
+function toggleFav(id){S.favs=S.favs.includes(id)?S.favs.filter(x=>x!==id):[...S.favs,id];save();render();if($('modal').dataset.v==='favs')showFavs()}
+function showFavs(){
+  const l=S.workers.filter(w=>S.favs.includes(w.id));
+  modal(`<h3 class="text-xl font-extrabold mb-4">♥ Mis favoritos</h3>${l.length?`<div class="grid gap-3">${l.map(w=>`<div class="flex items-center gap-3 border rounded-lg p-3"><div class="w-10 h-10 rounded-full text-white font-bold flex items-center justify-center" style="background:${color(w.name)}">${esc(ini(w.name))}</div><div class="flex-grow"><p class="font-bold">${esc(w.name)}</p><p class="text-xs text-gray-500">${esc(w.cat)} · ${esc(w.zona)}</p></div><button onclick="openWorker(${w.id})" class="text-brand font-bold text-sm">Ver</button></div>`).join('')}</div>`:'<p class="text-gray-500">Aún no guardas favoritos. Toca ♥ en un perfil.</p>'}${closeBtn()}`,'favs');
+}
+function modal(h,v=''){$('mBody').innerHTML=h;$('modal').dataset.v=v;$('modal').classList.remove('hidden')}
+function closeModal(){$('modal').classList.add('hidden')}
+const closeBtn=()=>'<button onclick="closeModal()" class="mt-5 w-full border border-gray-300 rounded-lg py-2 font-semibold text-gray-600 hover:bg-gray-50">Cerrar</button>';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function openWorker(id,msg){
+  const w=S.workers.find(x=>x.id===id);if(!w)return;
+  const text=encodeURIComponent(`Hola ${w.name}, te encontré en Jalecitos y necesito ayuda con ${w.cat.toLowerCase()}${msg?': '+msg:'.'}`);
+  const done=S.rated[id];
+  modal(`<div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 rounded-full text-white text-xl font-bold flex items-center justify-center" style="background:${color(w.name)}">${esc(ini(w.name))}</div>
+  <div><h3 class="text-xl font-extrabold">${esc(w.name)}</h3><p class="text-brand font-semibold text-sm">${esc(w.cat)} · ${esc(w.zona)}</p>${w.verified?'<p class="text-xs text-blue-600 font-bold mt-1">🛡️ Perfil verificado · Jale Seguro</p>':''}</div></div>
+  <p class="text-gray-600 text-sm mb-3">${esc(w.desc)}</p>
+  <div class="grid grid-cols-3 gap-2 text-center text-sm mb-4">
+   <div class="bg-gray-50 rounded-lg p-2"><b>${w.reviews?w.rating.toFixed(1):'—'}</b><br><span class="text-xs text-gray-500">${w.reviews} reseñas</span></div>
+   <div class="bg-gray-50 rounded-lg p-2"><b>${w.jobs}</b><br><span class="text-xs text-gray-500">jales</span></div>
+   <div class="bg-gray-50 rounded-lg p-2"><b>$${w.rate}</b><br><span class="text-xs text-gray-500">por hora</span></div></div>
+  <a href="https://wa.me/52${esc(w.wa)}?text=${text}" target="_blank" rel="noopener" class="block text-center bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600">💬 Contactar por WhatsApp</a>
+  <p class="text-xs text-gray-400 text-center mt-2">Tel: ${esc(w.wa)}</p>
+  <div class="mt-5 pt-4 border-t"><p class="font-semibold text-sm mb-2">${done?'Tu calificación: '+stars(done):'¿Ya trabajaste con '+esc(w.name.split(' ')[0])+'? Califícalo'}</p>
+  ${done?'':`<div class="flex gap-1 text-3xl text-yellow-400">${[1,2,3,4,5].map(n=>`<button onclick="rate(${id},${n})" class="hover:scale-125 transition">★</button>`).join('')}</div>`}</div>${closeBtn()}`,'w');
+}
+function rate(id,n){
+  const w=S.workers.find(x=>x.id===id);if(!w||S.rated[id])return;
+  w.rating=(w.rating*w.reviews+n)/(w.reviews+1);w.reviews++;w.jobs++;S.rated[id]=n;save();render();openWorker(id);toast('¡Gracias por tu calificación!');
+}
+
+function openRegister(){
+  const o=a=>a.map(x=>`<option>${x}</option>`).join('');
+  modal(`<h3 class="text-xl font-extrabold mb-1">Crear perfil de experto</h3><p class="text-sm text-gray-500 mb-4">Aparecerás de inmediato en las búsquedas.</p>
+  <form onsubmit="return addWorker(event)" class="grid gap-3 text-sm font-semibold">
+   <label>Nombre<input id="rN" required maxlength="40" class="inp mt-1"></label>
+   <div class="grid grid-cols-2 gap-3"><label>Oficio<select id="rC" class="inp mt-1">${o(CATS)}</select></label><label>Zona<select id="rZ" class="inp mt-1">${o(ZONAS)}</select></label></div>
+   <div class="grid grid-cols-2 gap-3"><label>WhatsApp (10 dígitos)<input id="rW" required inputmode="numeric" pattern="[0-9]{10}" class="inp mt-1"></label><label>Tarifa por hora ($)<input id="rR" required type="number" min="50" max="5000" class="inp mt-1"></label></div>
+   <label>Describe tu experiencia<textarea id="rD" required rows="3" maxlength="160" class="inp mt-1"></textarea></label>
+   <button class="bg-brand text-white font-bold py-3 rounded-lg hover:bg-orange-600">Publicar mi perfil</button></form>${closeBtn()}`,'reg');
+}
+function addWorker(e){
+  e.preventDefault();
+  const w={id:Date.now(),name:$('rN').value.trim(),cat:$('rC').value,zona:$('rZ').value,wa:$('rW').value.trim(),rate:+$('rR').value,desc:$('rD').value.trim(),rating:0,reviews:0,verified:false,jobs:0};
+  S.workers.unshift(w);save();closeModal();cat='Todos';$('q').value='';$('zona').value='';fill();render();
+  toast('¡Perfil publicado!');$('buscar').scrollIntoView();return false;
+}
+
+function matchNeed(e){
+  e.preventDefault();
+  const c=$('nCat').value,z=$('nZona').value,d=$('nDesc').value.trim();
+  const sc=S.workers.map(w=>({w,s:(w.cat===c?50:0)+(w.zona===z?30:0)+w.rating*4+(w.verified?10:0)+(matchText(w,d)?5:0)})).filter(x=>x.w.cat===c).sort((a,b)=>b.s-a.s).slice(0,3);
+  if(!sc.length)return modal(`<h3 class="text-xl font-extrabold mb-2">Sin coincidencias aún</h3><p class="text-gray-600 text-sm">Todavía no hay expertos en ${esc(c)}. ¡Corre la voz!</p>${closeBtn()}`),false;
+  window._need=d;
+  modal(`<h3 class="text-xl font-extrabold mb-1">⚡ Tus mejores matches</h3><p class="text-sm text-gray-500 mb-4">Para: “${esc(d)}”</p><div class="grid gap-3">${sc.map(({w,s})=>{const p=Math.min(99,Math.round(s/1.1));return `<div class="border rounded-xl p-3 flex items-center gap-3"><div class="w-11 h-11 rounded-full text-white font-bold flex items-center justify-center shrink-0" style="background:${color(w.name)}">${esc(ini(w.name))}</div><div class="flex-grow min-w-0"><p class="font-bold truncate">${esc(w.name)} ${w.verified?'🛡️':''}</p><p class="text-xs text-gray-500">${esc(w.zona)} · ${w.reviews?w.rating.toFixed(1)+' ★':'Nuevo'} · $${w.rate}/h</p></div><div class="text-right"><p class="text-green-600 font-extrabold">${p}%</p><button onclick="openWorker(${w.id},window._need)" class="text-brand text-xs font-bold">Contactar</button></div></div>`}).join('')}</div>${closeBtn()}`,'match');
+  return false;
+}
+function resetDemo(){if(!confirm('¿Borrar tus cambios y volver a los datos de demostración?'))return;S={workers:JSON.parse(JSON.stringify(SEED)),favs:[],rated:{}};save();cat='Todos';$('q').value='';fill();render();toast('Datos restablecidos')}
+
+fill();render();
+</script>
+</body>
+</html>
